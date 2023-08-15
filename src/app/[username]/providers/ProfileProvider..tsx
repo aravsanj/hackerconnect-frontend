@@ -9,6 +9,7 @@ import { BASE_URL } from "../../config";
 
 function ProfileProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<profile>();
+  const [posts, setPosts] = useState();
 
   const pathname = usePathname();
 
@@ -22,6 +23,7 @@ function ProfileProvider({ children }: { children: React.ReactNode }) {
       );
 
       setProfile(response.data.user);
+      setPosts(response.data.posts);
     } catch (error) {
       console.error(error);
     }
@@ -34,7 +36,7 @@ function ProfileProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <ProfileContext.Provider value={{ profile, setProfile, refetch }}>
+    <ProfileContext.Provider value={{ profile, setProfile, refetch, posts }}>
       {children}
     </ProfileContext.Provider>
   );

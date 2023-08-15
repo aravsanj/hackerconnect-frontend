@@ -7,15 +7,14 @@ import RecentPosts from "./components/RecentPosts";
 import useProfile from "./hooks/useProfile";
 
 const Page = () => {
-  const { profile } = useProfile();
-
+  const { profile, posts } = useProfile();
 
   return (
     <Row>
       <Col offset={6} span={10}>
         <Header profile={profile} />
         <About about={profile?.about} />
-        <RecentPosts />
+        <RecentPosts profile={profile} posts={posts} />
       </Col>
     </Row>
   );

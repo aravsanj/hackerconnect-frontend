@@ -19,6 +19,7 @@ type ProfileContext = {
     profile: profile | undefined,
     setProfile: Dispatch<SetStateAction<profile | undefined>>
     refetch: () => void,
+    posts: any[] | undefined,
 }
 
 const ProfileContext = createContext<ProfileContext>({} as ProfileContext);

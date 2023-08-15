@@ -226,7 +226,7 @@ export default function Register() {
           ]}
           hasFeedback={true}
         >
-          <Input.Password placeholder="password" name="password" />
+          <Input.Password placeholder="Password" name="password" />
         </Form.Item>
         <span
           style={{

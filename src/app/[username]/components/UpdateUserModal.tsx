@@ -85,7 +85,12 @@ const UpdateModal = ({ profile }: { profile: profile | undefined }) => {
           footer={null}
         >
           <Form onFinish={onFinish}>
-            <Form.Item label="Name" labelCol={{ span: 24 }} required={true}>
+            <Form.Item
+              label="Name"
+              labelCol={{ span: 24 }}
+              required={true}
+              className="!m-0"
+            >
               <Form.Item
                 initialValue={profile?.firstName}
                 name="firstName"
@@ -163,6 +168,7 @@ const UpdateModal = ({ profile }: { profile: profile | undefined }) => {
                     console.error(error);
                   }
                 }}
+                onRemove={() => setProfileUrl("")}
                 listType="picture"
               >
                 <Button>Upload</Button>
@@ -194,6 +200,7 @@ const UpdateModal = ({ profile }: { profile: profile | undefined }) => {
                     console.error(error);
                   }
                 }}
+                onRemove={() => setCoverUrl("")}
                 listType="picture"
               >
                 <Button>Upload</Button>

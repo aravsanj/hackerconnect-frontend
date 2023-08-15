@@ -12,7 +12,7 @@ const About = ({ about }: Props) => {
   const isLoggedIn = user?.isLoggedIn;
 
   return (
-    <div className="flex flex-col mt-8 p-10 rounded-xl bg-[#E1E8ED] relative">
+    <div className="flex flex-col mt-8 p-10 rounded-xl bg-[#fff] relative">
       <Typography.Title level={4} className="mb-0 pb-0">
         About
       </Typography.Title>

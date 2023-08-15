@@ -10,7 +10,7 @@ const Header = ({ profile }: { profile: profile | undefined }) => {
   const isLoggedIn = user?.isLoggedIn;
 
   return (
-    <div className="flex flex-col mt-16 h-[400px] rounded-xl bg-[#E1E8ED] relative">
+    <div className="flex flex-col mt-16 h-[400px] rounded-xl bg-[#fff] relative">
       <CoverPhoto url={profile?.cover} />
       <div className="flex flex-col p-4 ml-6 -mt-20">
         <Avatar url={profile?.profile} />

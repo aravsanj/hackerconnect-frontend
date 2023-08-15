@@ -28,7 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ConfigProvider theme={theme}>
       <StyleProvider hashPriority="high">
-        <div className="bg-[#8cd3ff]">
+        <div className="bg-[#8cd3ff] min-h-screen pb-20">
           <NavBar />
           {children}
         </div>

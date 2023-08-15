@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { BASE_URL } from "../config";
+import { UserOutlined } from "@ant-design/icons";
 
 const { Header } = Layout;
 
@@ -16,6 +17,8 @@ const NavBar = () => {
   const { user, refetch } = useUser();
   const profile = user?.profile;
   const username = user?.username;
+  const isLoggedIn = user?.isLoggedIn;
+
   const router = useRouter();
 
   async function logout() {
@@ -81,26 +84,43 @@ const NavBar = () => {
           <Input.Search placeholder="Search.." />
         </div>
 
-        <IconContext.Provider value={{ size: "28px", color: "white" }}>
-          <div className="flex gap-x-4">
-            <AiFillHome
-              className="cursor-pointer"
-              onClick={() => router.push("/feed")}
-            />
-            <IoMdNotifications className="cursor-pointer" />
-            <FaUserFriends
-              className="cursor-pointer"
-              onClick={() => router.push("/network")}
-            />
-            <Dropdown
-              menu={{ items }}
-              placement="bottomRight"
-              arrow={{ pointAtCenter: true }}
-            >
-              <Avatar className="cursor-pointer" src={profile} />
-            </Dropdown>
-          </div>
-        </IconContext.Provider>
+        {isLoggedIn ? (
+          <IconContext.Provider value={{ size: "28px", color: "white" }}>
+            <div className="flex gap-x-4">
+              <AiFillHome
+                className="cursor-pointer"
+                onClick={() => router.push("/feed")}
+              />
+              <IoMdNotifications className="cursor-pointer" />
+              <FaUserFriends
+                className="cursor-pointer"
+                onClick={() => router.push("/network")}
+              />
+              <Dropdown
+                menu={{ items }}
+                placement="bottomRight"
+                arrow={{ pointAtCenter: true }}
+              >
+                <Avatar
+                  size={26}
+                  className="cursor-pointer"
+                  src={profile}
+                  icon={<UserOutlined />}
+                  draggable={false}
+                />
+              </Dropdown>
+            </div>
+          </IconContext.Provider>
+        ) : (
+          <Button
+            type="primary"
+            onClick={() => router.push("/")}
+            icon={<UserOutlined />}
+            className="bg-indigo-600 hover:bg-indigo-700 focus:bg-indigo-800 border-indigo-600 focus:border-indigo-700"
+          >
+            Login
+          </Button>
+        )}
       </Header>
     </Layout>
   );
