@@ -2,11 +2,27 @@
 
 import { createContext } from "react";
 
-type FeedContext = {
-    posts: any[] | undefined
-    refetch: () => void
-}
+type User = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  profile: string;
+};
 
-const FeedContext = createContext({} as FeedContext);
+export type Post = {
+  _id: string;
+  content: string;
+  user: User;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type FeedContextType = {
+  posts: Post[] | undefined;
+  refetch: () => void;
+};
+
+const FeedContext = createContext({} as FeedContextType);
 
 export default FeedContext;

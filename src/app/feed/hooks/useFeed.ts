@@ -1,8 +1,9 @@
 import { useContext } from "react";
-import FeedContext from "../contexts/feedContext";
+import FeedContext, { FeedContextType } from "../contexts/feedContext";
+
 
 function useFeed() {
-  return useContext(FeedContext);
+  return useContext<FeedContextType>(FeedContext);
 }
 
 export default useFeed;

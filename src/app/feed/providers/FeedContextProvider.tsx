@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import FeedContext from "../contexts/feedContext";
+import FeedContext, { Post } from "../contexts/feedContext";
 import axios from "axios";
 import { BASE_URL } from "../../config";
 
 function FeedContextProvider({ children }: { children: React.ReactNode }) {
-  const [posts, setPosts] = useState();
+  const [posts, setPosts] = useState<Post[]>();
 
   async function getPosts() {
     try {
