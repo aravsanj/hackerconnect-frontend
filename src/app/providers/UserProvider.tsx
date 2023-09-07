@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import UserContext, { User } from "../contexts/userContext";
 import axios from "axios";
 import { BASE_URL } from "../config";
+import { socket } from "../socket.config";
 
 function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>({
@@ -15,9 +16,15 @@ function UserProvider({ children }: { children: React.ReactNode }) {
     dateOfBirth: "",
     phone: "",
     profile: "",
+    title: "",
+    cover: "",
     isLoggedIn: null,
+    connections: [],
     hasReceivedFirstResponse: false,
+    chatInfo: []
   });
+
+  const [notifications, setNotifications] = useState([]);
 
   async function getUserData() {
     try {
@@ -25,21 +32,76 @@ function UserProvider({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      setUser({ ...response.data.user, isLoggedIn: true, hasReceivedFirstResponse: true });
+      setUser({
+        ...response.data.combinedData.user,
+        chatInfo: response.data.combinedData.chatInfo,
+        isLoggedIn: true,
+        hasReceivedFirstResponse: true,
+      });
     } catch (error) {
       setUser({ isLoggedIn: false, hasReceivedFirstResponse: true } as User);
       console.error(error);
     }
   }
-
   const refetch = () => getUserData();
+
+  async function getNotifications() {
+    try {
+      const response = await axios.get(`${BASE_URL}/user/getNotifications`, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+      setNotifications(response.data.notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  }
+
+  async function updateNotifications() {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/user/updateNotifications`,
+        {},
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      getNotifications();
+    } catch (error) {
+      console.error("Error updating notifications:", error);
+    }
+  }
 
   useEffect(() => {
     getUserData();
   }, []);
 
+  useEffect(() => {
+    if (user?.isLoggedIn) {
+      getNotifications();
+      socket?.connect();
+      socket?.emit("join", user?._id);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    socket?.on("notification", () => {
+      getNotifications();
+    });
+  });
+
   return (
-    <UserContext.Provider value={{ user, setUser, refetch }}>
+    <UserContext.Provider
+      value={{
+        user,
+        setUser,
+        refetch,
+        notifications,
+        updateNotifications,
+        socket,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

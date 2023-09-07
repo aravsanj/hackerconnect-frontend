@@ -21,6 +21,7 @@ export type Post = {
 export type FeedContextType = {
   posts: Post[] | undefined;
   refetch: () => void;
+  updatePosts: (post: any) => void;
 };
 
 const FeedContext = createContext({} as FeedContextType);

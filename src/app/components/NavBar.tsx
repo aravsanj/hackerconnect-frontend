@@ -1,15 +1,17 @@
-import { Layout, Input, Avatar, Dropdown, MenuProps, Button } from "antd";
-import { PiMetaLogoBold } from "react-icons/pi";
-import { AiFillHome } from "react-icons/ai";
-import { IoMdNotifications } from "react-icons/io";
-import { FaUserFriends } from "react-icons/fa";
-import { IconContext } from "react-icons";
+import { Layout, Avatar, Dropdown, Menu, Button, MenuProps } from "antd";
 import useUser from "../hooks/useUser";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { BASE_URL } from "../config";
 import { UserOutlined } from "@ant-design/icons";
+import {
+  HomeFilled,
+  TeamOutlined
+} from "@ant-design/icons";
+import NotificationPopover from "./NotificationPopover";
+import SearchBar from "./SearchBar";
+import Image from "next/image";
 
 const { Header } = Layout;
 
@@ -23,7 +25,6 @@ const NavBar = () => {
 
   async function logout() {
     try {
-      console.log("called logout");
       const response = await axios.post(
         `${BASE_URL}/auth/logout`,
         {},
@@ -35,7 +36,7 @@ const NavBar = () => {
       refetch();
       router.push("/");
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("Logout failed:", error);2
     }
   }
 
@@ -67,50 +68,57 @@ const NavBar = () => {
   ];
 
   return (
-    <Layout>
-      <Header
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#1D9BF0",
-          padding: "10px 50px",
-          height: "60px",
-          gap: "600px",
-        }}
-      >
-        <div className="flex items-center gap-x-4">
-          <PiMetaLogoBold color="white" size="28px" />
-          <Input.Search placeholder="Search.." />
-        </div>
+    <Header
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        backgroundColor: "#1D9BF0",
+        padding: "10px 20px",
+      }}
+      className="md:!px-[150px] lg:!px-[200px]"
+    >
+      <div className="flex items-center gap-x-4">
+        <Link href="/feed">
+          {/* <Image src="/logo.png" width={30} height={30} alt="logo" /> */}
+          <span className="cursor-pointer text-2xl leading-none font-black font-mono p-2 bg-indigo-950 rounded-lg text-white font">
+            K_
+          </span>
+        </Link>
 
+        <SearchBar />
+      </div>
+
+      <div className="flex gap-x-3">
         {isLoggedIn ? (
-          <IconContext.Provider value={{ size: "28px", color: "white" }}>
-            <div className="flex gap-x-4">
-              <AiFillHome
+          <>
+            <HomeFilled
+              className="cursor-pointer"
+              style={{ color: "white", fontSize: "20px" }}
+              onClick={() => router.push("/feed")}
+            />
+            <TeamOutlined
+              className="cursor-pointer"
+              style={{ color: "white", fontSize: "20px" }}
+              onClick={() => router.push("/network")}
+            />
+
+            <NotificationPopover />
+
+            <Dropdown
+              overlay={<Menu items={items} />}
+              placement="bottomRight"
+              arrow={{ pointAtCenter: true }}
+            >
+              <Avatar
+                size={24}
                 className="cursor-pointer"
-                onClick={() => router.push("/feed")}
+                src={profile}
+                icon={<UserOutlined />}
+                draggable={false}
               />
-              <IoMdNotifications className="cursor-pointer" />
-              <FaUserFriends
-                className="cursor-pointer"
-                onClick={() => router.push("/network")}
-              />
-              <Dropdown
-                menu={{ items }}
-                placement="bottomRight"
-                arrow={{ pointAtCenter: true }}
-              >
-                <Avatar
-                  size={26}
-                  className="cursor-pointer"
-                  src={profile}
-                  icon={<UserOutlined />}
-                  draggable={false}
-                />
-              </Dropdown>
-            </div>
-          </IconContext.Provider>
+            </Dropdown>
+          </>
         ) : (
           <Button
             type="primary"
@@ -121,8 +129,8 @@ const NavBar = () => {
             Login
           </Button>
         )}
-      </Header>
-    </Layout>
+      </div>
+    </Header>
   );
 };
 

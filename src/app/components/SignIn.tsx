@@ -1,10 +1,11 @@
-import { Button, Form, Input, notification } from "antd";
+import { Button, Form, Input, message, notification } from "antd";
 import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BASE_URL } from "../config";
 import ForgotPassword from "./ForgotPassword";
 import useUser from "../hooks/useUser";
+import OTPModal from "./OTP";
 
 type FieldType = {
   username: String;
@@ -14,6 +15,9 @@ type FieldType = {
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [phone, setPhone] = useState("");
+
   const router = useRouter();
   const { refetch } = useUser();
 
@@ -28,6 +32,25 @@ export default function SignIn() {
     });
   };
 
+  const verifyOTP = async (value: string) => {
+    try {
+      const payload = {
+        phone: phone,
+        enteredOTP: value,
+      };
+
+      const response = await axios.post(`${BASE_URL}/auth/verifyOTP`, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      openNotificationWithIcon("success");
+      setShowOTP(false);
+    } catch (e: any) {
+      message.warning("OTP validation failed, try again");
+      console.error(e);
+    }
+  };
+
   const onFinish = async (values: FieldType) => {
     setLoading(true);
     try {
@@ -35,6 +58,13 @@ export default function SignIn() {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
+
+      if (!response.data.isVerified) {
+        openNotificationWithIcon("error");
+        setLoading(false);
+        return;
+      }
+
       refetch();
       router.push("/feed");
     } catch (error) {
@@ -51,6 +81,8 @@ export default function SignIn() {
   return (
     <>
       {contextHolder}
+      <OTPModal visible={showOTP} onOTPSubmit={verifyOTP} />
+
       <Form
         name="SignIn"
         style={{ maxWidth: 600 }}

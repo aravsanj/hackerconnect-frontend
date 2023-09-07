@@ -1,6 +1,10 @@
+import useUser from "@/app/hooks/useUser";
 import { Skeleton, Typography } from "antd";
 
 const Meta = ({ profile }: any) => {
+  const { user } = useUser();
+  const sameUser = user?._id === profile?._id;
+
   if (!profile) {
     return (
       <Skeleton
@@ -22,7 +26,15 @@ const Meta = ({ profile }: any) => {
         @{`${username}`}
       </Typography.Text>
 
-      <Typography.Text className="mt-6">{`${title}`}</Typography.Text>
+      {title ? (
+        <Typography.Text className="mt-6">{title}</Typography.Text>
+      ) : sameUser ? (
+        <p className="text-gray-600 mt-6">
+          Unlock your story: add your title and inspire others!
+        </p>
+      ) : (
+        ""
+      )}
     </div>
   );
 };

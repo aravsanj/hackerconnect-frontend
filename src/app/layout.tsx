@@ -7,7 +7,7 @@ import UserProvider from "./providers/UserProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "HackerConnect",
+  title: "Konnect",
   description: "Let them know you're here",
 };
 

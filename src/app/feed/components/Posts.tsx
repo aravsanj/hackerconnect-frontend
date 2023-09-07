@@ -1,11 +1,11 @@
 import PostComponent from "./Post";
-import useFeed from "../feed/hooks/useFeed";
+import useFeed from "../hooks/useFeed";
 
 type Props = {};
 
 const Posts = (props: Props) => {
   const { posts } = useFeed();
-
+  
   if (posts) {
     return (
       <div className="mt-6">

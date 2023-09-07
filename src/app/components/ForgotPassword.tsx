@@ -18,13 +18,6 @@ export default function ForgotPassword({ setShowForgotPassword }: Props) {
 
   const [api, contextHolder] = notification.useNotification();
 
-  const openErrorNotification = (type: NotificationType) => {
-    api[type]({
-      message: "Wrong email!",
-      description: "The user does not exist!",
-    });
-  };
-
   const openSuccessNotification = (type: NotificationType) => {
     api[type]({
       message: "Success!",
@@ -44,8 +37,11 @@ export default function ForgotPassword({ setShowForgotPassword }: Props) {
       );
       openSuccessNotification("success");
     } catch (error) {
-      openErrorNotification("error");
-      console.error(error);
+      // It will still show success notification even if the email does not exist. 
+      // This is implemented for security considerations
+
+      openSuccessNotification("success");
+      // console.error(error);
     }
     setLoading(false);
   };

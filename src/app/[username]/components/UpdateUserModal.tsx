@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Modal, Upload } from "antd";
+import { Button, Modal, Upload, message } from "antd";
 import EditButton from "./Utils/EditButton";
 import { DatePicker, Form, Input } from "antd";
 import axios from "axios";
@@ -71,6 +71,16 @@ const UpdateModal = ({ profile }: { profile: profile | undefined }) => {
 
   const handleCancel = () => {
     setOpen(false);
+  };
+
+  const imageTypes = ['image/jpeg', 'image/png', 'image/gif']; 
+
+  const beforeUpload = (file: {type: string}) => {
+    const isValidType = imageTypes.includes(file.type);
+    if (!isValidType) {
+      message.error('You can only upload image files!');
+    }
+    return isValidType ? true : Upload.LIST_IGNORE;
   };
 
   if (profile) {
@@ -145,6 +155,7 @@ const UpdateModal = ({ profile }: { profile: profile | undefined }) => {
             <Form.Item label="Profile picture" labelCol={{ span: 24 }}>
               <Upload
                 maxCount={1}
+                beforeUpload={beforeUpload}
                 customRequest={async ({ file, onSuccess }) => {
                   try {
                     const formData = new FormData();

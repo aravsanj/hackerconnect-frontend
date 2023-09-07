@@ -11,8 +11,12 @@ export type User = {
   dateOfBirth: string;
   phone: string;
   profile: string;
+  cover: string;
+  title: string;
+  connections: Array<any>;
   isLoggedIn: boolean | null;
   hasReceivedFirstResponse: boolean;
+  chatInfo: any;
 };
 
 type setUser = (user: User) => void;
@@ -23,6 +27,10 @@ export type UserContextType = {
   user: User | undefined;
   setUser: setUser;
   refetch: refetch;
+  socket?: any;
+  notifications: any[];
+  updateNotifications: () => void;
+  zegoInstance?: any
 };
 
 const UserContext = createContext<UserContextType>({} as UserContextType);

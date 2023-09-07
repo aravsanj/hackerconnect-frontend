@@ -1,10 +1,11 @@
-import { Modal, Button, Input, Form } from "antd";
+import { Modal, Input } from "antd";
 import UserBadge from "./UserBadge";
 import useUser from "@/app/hooks/useUser";
 import axios from "axios";
 import { BASE_URL } from "@/app/config";
 import { useState } from "react";
 import useFeed from "../hooks/useFeed";
+import ImageUpload from "./ImageUpload";
 
 type Props = {
   visible: boolean;
@@ -12,13 +13,18 @@ type Props = {
 };
 
 const CreatePostModal = ({ visible, onClose }: Props) => {
-  const [loading, setLoading] = useState(false);
   const { user } = useUser();
-  const { refetch } = useFeed();
+  const { updatePosts } = useFeed();
   const _id = user?._id;
+  const [imageURLs, setImageURLs] = useState<string[]>([]);
+  const [content, setContent] = useState<string>("");
 
-  const submitPost = async (postContent: { content: string }) => {
-    setLoading(true);
+  const submitPost = async () => {
+    const postContent = {
+      content,
+      imageURLs,
+    };
+
     try {
       const response = await axios.post(
         `${BASE_URL}/post/createPost`,
@@ -31,41 +37,32 @@ const CreatePostModal = ({ visible, onClose }: Props) => {
           withCredentials: true,
         }
       );
-      refetch();
+      updatePosts(response.data.post)
+    
       onClose();
     } catch (error) {
       console.error(error);
     }
-    setLoading(false);
   };
 
   return (
-    <Modal open={visible} onCancel={onClose} footer={null}>
+    <Modal open={visible} onCancel={onClose} okText="Submit" onOk={submitPost}>
       <UserBadge
         name={`${user?.firstName} ${user?.lastName}`}
         profile={user?.profile}
       />
-      <Form onFinish={submitPost} className="flex flex-col">
-        <Form.Item name="content">
-          <Input.TextArea
-            placeholder="What do you want to talk about?"
-            rows={10}
-            bordered={false}
-            className="!px-0"
-            style={{ resize: "none" }}
-          />
-        </Form.Item>
-        <Form.Item className="self-end p-2">
-          <Button
-            loading={loading}
-            key="submit"
-            type="primary"
-            htmlType="submit"
-          >
-            Post
-          </Button>
-        </Form.Item>
-      </Form>
+
+      <Input.TextArea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="What do you want to talk about?"
+        rows={10}
+        bordered={false}
+        className="!px-0"
+        style={{ resize: "none" }}
+      />
+
+      <ImageUpload setImageURLs={setImageURLs} />
     </Modal>
   );
 };

@@ -4,10 +4,12 @@ import Meta from "./Utils/Meta";
 import UpdateModal from "./UpdateUserModal";
 import { profile } from "../contexts/profileContext";
 import useUser from "../../hooks/useUser";
+import ConnectButton from "./Utils/ConnectButton";
 
 const Header = ({ profile }: { profile: profile | undefined }) => {
   const { user } = useUser();
   const isLoggedIn = user?.isLoggedIn;
+  const sameUser = user?._id === profile?._id;
 
   return (
     <div className="flex flex-col mt-16 h-[400px] rounded-xl bg-[#fff] relative">
@@ -16,11 +18,14 @@ const Header = ({ profile }: { profile: profile | undefined }) => {
         <Avatar url={profile?.profile} />
         <Meta profile={profile} />
       </div>
-      {isLoggedIn && (
+
+      {isLoggedIn && sameUser && (
         <div className="self-end pr-12">
           <UpdateModal profile={profile} />
         </div>
       )}
+
+      {isLoggedIn && !sameUser && <ConnectButton />}
     </div>
   );
 };

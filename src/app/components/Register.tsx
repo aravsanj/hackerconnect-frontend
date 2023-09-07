@@ -1,7 +1,16 @@
-import { Button, Checkbox, DatePicker, Form, Input, notification } from "antd";
+import {
+  Button,
+  Checkbox,
+  DatePicker,
+  Form,
+  Input,
+  message,
+  notification,
+} from "antd";
 import axios from "axios";
 import { useState } from "react";
 import { BASE_URL } from "../config";
+import OTPModal from "./OTP";
 
 type FieldType = {
   firstName: string;
@@ -17,6 +26,9 @@ type FieldType = {
 
 export default function Register() {
   const [loading, setLoading] = useState(false);
+  const [isOTPVisible, setIsOTPVisible] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
 
   type NotificationType = "success" | "info" | "warning" | "error";
 
@@ -25,7 +37,7 @@ export default function Register() {
   const openNotificationWithIcon = (type: NotificationType) => {
     api[type]({
       message: "Account created successfully!",
-      description: "You can now log in with your new account.",
+      description: "Please check your mail for log in instructions.",
     });
   };
 
@@ -35,11 +47,33 @@ export default function Register() {
       const response = await axios.post(`${BASE_URL}/auth/register`, values, {
         headers: { "Content-Type": "application/json" },
       });
-      openNotificationWithIcon("success");
+      setPhone(response.data.phone);
+      setEmail(response.data.email);
+      setIsOTPVisible(true);
     } catch (error) {
       console.error(error);
     }
     setLoading(false);
+  };
+
+  const verifyOTP = async (value: string) => {
+    try {
+      const payload = {
+        phone: phone,
+        email: email,
+        enteredOTP: value,
+      };
+
+      const response = await axios.post(`${BASE_URL}/auth/verifyOTP`, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      openNotificationWithIcon("success");
+      setIsOTPVisible(false);
+    } catch (e: any) {
+      message.warning("OTP validation failed, try again");
+      console.error(e);
+    }
   };
 
   const passwordRegex =
@@ -60,7 +94,43 @@ export default function Register() {
 
       return alreadyExits;
     } catch (error) {
-      console.log(error);
+      console.error(error);
+    }
+  };
+
+  const verifyPhone = async (phone: string) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/auth/validatePhone`,
+        { phone },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const alreadyExits = response?.data?.alreadyExists;
+
+      return alreadyExits;
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const verifyEmail = async (email: string) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/auth/validateEmail`,
+        { email },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const alreadyExits = response?.data?.alreadyExists;
+
+      return alreadyExits;
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -75,6 +145,7 @@ export default function Register() {
   return (
     <>
       {contextHolder}
+      <OTPModal visible={isOTPVisible} onOTPSubmit={verifyOTP} />
       <Form onFinish={onFinish}>
         <Form.Item
           name="firstName"
@@ -162,6 +233,15 @@ export default function Register() {
             {
               type: "string",
             },
+            {
+              validator: async (_, value) => {
+                const result = await verifyPhone(value);
+
+                if (result) {
+                  return Promise.reject("Phone already exists.");
+                }
+              },
+            },
           ]}
           hasFeedback={true}
         >
@@ -175,6 +255,15 @@ export default function Register() {
               message: "Please enter your email",
             },
             { type: "email", message: "Please enter a valid email" },
+            {
+              validator: async (_, value) => {
+                const result = await verifyEmail(value);
+
+                if (result) {
+                  return Promise.reject("Email already exists.");
+                }
+              },
+            },
           ]}
           hasFeedback={true}
         >
@@ -194,7 +283,7 @@ export default function Register() {
               validator: async (_, value) => {
                 const result = await verifyUsername(value);
 
-                if(result) {
+                if (result) {
                   return Promise.reject("Username already exists.");
                 }
 
