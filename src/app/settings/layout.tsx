@@ -4,6 +4,7 @@ import { Spin } from "antd";
 import NavBar from "../components/NavBar";
 import useUser from "../hooks/useUser";
 import { useRouter } from "next/navigation";
+import { StyleProvider } from "@ant-design/cssinjs";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -24,9 +25,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="bg-[#8cd3ff]">
-      <NavBar />
-      {children}
-    </div>
+    <StyleProvider hashPriority="high">
+      <div className="bg-[#8cd3ff]">
+        <NavBar />
+        {children}
+      </div>
+    </StyleProvider>
   );
 }

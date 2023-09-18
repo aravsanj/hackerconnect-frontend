@@ -2,7 +2,7 @@ import { ZIM } from "zego-zim-web";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { ZEGO_APP_ID, ZEGO_SERVER_SECRET } from "./config";
 
-interface createZegoInstance {
+interface ICreateZegoInstance {
   userName: string;
   userID: string;
 }
@@ -10,7 +10,7 @@ interface createZegoInstance {
 function generateKitTokenForTest({
   userName,
   userID,
-}: createZegoInstance): string | null {
+}: ICreateZegoInstance): string | null {
   if (!ZEGO_APP_ID || !ZEGO_SERVER_SECRET) {
     return null;
   }
@@ -26,7 +26,7 @@ function generateKitTokenForTest({
   return TOKEN;
 }
 
-function createZegoInstance({ userName, userID }: createZegoInstance) {
+function createZegoInstance({ userName, userID }: ICreateZegoInstance) {
   const TOKEN: string | null = generateKitTokenForTest({ userName, userID });
   if (TOKEN) {
     const zp = ZegoUIKitPrebuilt.create(TOKEN);
@@ -38,4 +38,4 @@ function createZegoInstance({ userName, userID }: createZegoInstance) {
   }
 }
 
-export { createZegoInstance};
+export { createZegoInstance, generateKitTokenForTest};

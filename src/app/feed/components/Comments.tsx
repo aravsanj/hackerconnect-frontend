@@ -1,12 +1,28 @@
-import { List, Avatar, Input, Button } from "antd";
-import { SendOutlined } from "@ant-design/icons";
+import { List, Avatar, Button } from "antd";
+import { CommentOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "@/app/config";
 import useUser from "@/app/hooks/useUser";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import {
+  MentionsInput,
+  Mention,
+  MentionItem,
+  SuggestionDataItem,
+} from "react-mentions";
+import mentionInputStyles from "../styles/mentionInputStyles";
+import mentionStyle from "../styles/mentionStyle";
+
 dayjs.extend(relativeTime);
+
+const pattern = /@\[([a-zA-Z0-9]+)\]\([a-f0-9]+\)/;
+function replaceMentionsWithStyledText(text: string) {
+  return text.replace(pattern, (match, mention) => {
+    return `<a href="/${mention}" style="color: blue;">${mention}</a>`;
+  });
+}
 
 const Comments = ({
   comments,
@@ -22,7 +38,10 @@ const Comments = ({
   currentPage: number;
 }) => {
   const [content, setContent] = useState("");
+  const [mentions, setMentions] = useState<MentionItem[]>();
+
   const { user } = useUser();
+  const connections = user?.connections;
 
   const addComment = async () => {
     try {
@@ -30,6 +49,7 @@ const Comments = ({
         `${BASE_URL}/post/addComment`,
         {
           content,
+          mentions,
           userId: user?._id,
           postId,
         },
@@ -48,11 +68,17 @@ const Comments = ({
     }
   };
 
-  console.log(comments);
+  // * reminder: fix when there are no connections
+  // @ts-ignore
+  const suggestions: SuggestionDataItem[] = connections?.map((item, index) => ({
+    id: item._id,
+    display: item.username,
+  }));
+
   return (
     <div className="mt-10 bg-gray-100 p-4 rounded-lg">
-      <div className="mb-4 flex">
-        <Input
+      <div className="mb-4 flex flex-col">
+        {/* <Input
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Add a comment"
@@ -63,7 +89,35 @@ const Comments = ({
               <SendOutlined onClick={addComment} />
             </span>
           }
-        />
+        /> */}
+        <MentionsInput
+          value={content}
+          placeholder=" Add a comment"
+          onChange={(e, newValue, newPlainTextValue, mentions) => {
+            setMentions(mentions);
+            setContent(newValue);
+          }}
+          style={mentionInputStyles}
+          className="w-full"
+        >
+          <Mention
+            trigger="@"
+            data={suggestions}
+            className="!focus:border-none"
+            style={mentionStyle}
+            renderSuggestion={(suggestion, search, highlightedDisplay) => (
+              <div className="">{highlightedDisplay}</div>
+            )}
+          />
+        </MentionsInput>
+        <Button
+          type="link"
+          className="self-end mt-2"
+          icon={<CommentOutlined />}
+          onClick={addComment}
+        >
+          Comment
+        </Button>
       </div>
       <List
         itemLayout="horizontal"
@@ -82,7 +136,8 @@ const Comments = ({
         }
         renderItem={(comment, index) => {
           const date = dayjs(comment.createdAt).fromNow();
-
+          const styledText = replaceMentionsWithStyledText(comment.content);
+          const styledHtml = { __html: styledText };
           return (
             <List.Item>
               <List.Item.Meta
@@ -100,7 +155,7 @@ const Comments = ({
                     <span className="ml-2 text-xs	 text-slate-500">{date}</span>
                   </>
                 }
-                description={comment.content}
+                description={<span dangerouslySetInnerHTML={styledHtml}></span>}
               />
             </List.Item>
           );

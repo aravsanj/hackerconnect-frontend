@@ -11,7 +11,6 @@ import {
 } from "@ant-design/icons";
 import NotificationPopover from "./NotificationPopover";
 import SearchBar from "./SearchBar";
-import Image from "next/image";
 
 const { Header } = Layout;
 
@@ -80,7 +79,6 @@ const NavBar = () => {
     >
       <div className="flex items-center gap-x-4">
         <Link href="/feed">
-          {/* <Image src="/logo.png" width={30} height={30} alt="logo" /> */}
           <span className="cursor-pointer text-2xl leading-none font-black font-mono p-2 bg-indigo-950 rounded-lg text-white font">
             K_
           </span>

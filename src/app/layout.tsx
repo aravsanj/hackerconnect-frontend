@@ -3,6 +3,7 @@ import StyledComponentsRegistry from "./lib/AntdRegistry";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import UserProvider from "./providers/UserProvider";
+import AuthContextProvider from "./providers/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <UserProvider>
-          <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
-        </UserProvider>
+        <AuthContextProvider>
+          <UserProvider>
+            <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+          </UserProvider>
+        </AuthContextProvider>
       </body>
     </html>
   );

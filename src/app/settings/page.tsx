@@ -1,17 +1,14 @@
-"use client"
-import { Typography } from 'antd'
-import React from 'react'
+"use client";
+import SettingsPage from "./components/Settings";
 
-type Props = {}
+type Props = {};
 
 const page = (props: Props) => {
   return (
-    <div className='h-screen flex justify-center items-center'>
-        <Typography.Title level={1} className='mb-0 pb-0'>
-            Settings
-        </Typography.Title>
+    <div className="h-screen flex justify-center items-center">
+      <SettingsPage />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

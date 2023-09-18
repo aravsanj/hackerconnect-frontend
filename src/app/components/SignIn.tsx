@@ -1,11 +1,11 @@
-import { Button, Form, Input, message, notification } from "antd";
+import { Button, Form, Input, notification } from "antd";
 import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BASE_URL } from "../config";
 import ForgotPassword from "./ForgotPassword";
 import useUser from "../hooks/useUser";
-import OTPModal from "./OTP";
+import useAuth from "../hooks/useAuth";
 
 type FieldType = {
   username: String;
@@ -15,8 +15,13 @@ type FieldType = {
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showOTP, setShowOTP] = useState(false);
-  const [phone, setPhone] = useState("");
+  const {
+    setEmail,
+    setPhone,
+    setIsRedirectedFromLogin,
+    setIsPhoneVerified,
+    setIsEmailVerified,
+  } = useAuth();
 
   const router = useRouter();
   const { refetch } = useUser();
@@ -32,25 +37,6 @@ export default function SignIn() {
     });
   };
 
-  const verifyOTP = async (value: string) => {
-    try {
-      const payload = {
-        phone: phone,
-        enteredOTP: value,
-      };
-
-      const response = await axios.post(`${BASE_URL}/auth/verifyOTP`, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      openNotificationWithIcon("success");
-      setShowOTP(false);
-    } catch (e: any) {
-      message.warning("OTP validation failed, try again");
-      console.error(e);
-    }
-  };
-
   const onFinish = async (values: FieldType) => {
     setLoading(true);
     try {
@@ -59,14 +45,31 @@ export default function SignIn() {
         withCredentials: true,
       });
 
-      if (!response.data.isVerified) {
-        openNotificationWithIcon("error");
+      if (response.status === 200) {
+        refetch();
+        router.push("/feed");
+      }
+
+      if (response.status === 202) {
+        setEmail(response.data.email);
+        setPhone(response.data.phone);
+
+        if (!response.data.isOTPVerified) {
+          console.log("aa")
+          setIsPhoneVerified(false);
+          setIsRedirectedFromLogin(true);
+          router.push("/enter-otp");
+        }
+
+        if (!response.data.isEmailVerified) {
+          setIsEmailVerified(false);
+          setIsRedirectedFromLogin(true);
+          router.push("/enter-otp");
+        }
+
         setLoading(false);
         return;
       }
-
-      refetch();
-      router.push("/feed");
     } catch (error) {
       openNotificationWithIcon("error");
       console.error(error);
@@ -81,7 +84,6 @@ export default function SignIn() {
   return (
     <>
       {contextHolder}
-      <OTPModal visible={showOTP} onOTPSubmit={verifyOTP} />
 
       <Form
         name="SignIn"

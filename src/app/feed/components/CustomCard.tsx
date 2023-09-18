@@ -6,7 +6,7 @@ const CustomCard = () => {
   const { user } = useUser();
 
   return (
-    <div className="h-[250px] mt-10 bg-white rounded-xl">
+    <div className="h-[250px] w-[300px] mt-10 bg-white rounded-xl">
       <div
         className="h-[45%] rounded-tl-xl rounded-tr-xl relative bg-cover bg-center"
         style={{

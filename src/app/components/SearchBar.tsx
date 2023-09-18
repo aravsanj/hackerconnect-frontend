@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input, Popover, List, Avatar, Tabs } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import axios from "axios";
@@ -13,13 +13,16 @@ const SearchBar = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [postResults, setPostResults] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("users");
+  const [page, setPage] = useState(1);
+  const [postsPage, setPostsPage] = useState(1);
 
-  const fetchUsers = async (value: any) => {
+  const fetchUsers = async () => {
     try {
       const response = await axios.post(
         `${BASE_URL}/user/search`,
         {
           searchText: searchQuery,
+          page,
         },
         {
           headers: {
@@ -28,18 +31,32 @@ const SearchBar = () => {
           withCredentials: true,
         }
       );
-      setSearchResults(response.data);
+
+      if (searchResults.length !== 0) {
+        setSearchResults((prev) => [...prev, ...response.data]);
+      } else {
+        setSearchResults(response.data);
+      }
     } catch (e: any) {
       console.error(e);
     }
   };
 
-  const fetchPosts = async (value: any) => {
+  const nextPage = () => {
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const nextPagePost = () => {
+    setPostsPage((prevPage) => prevPage + 1);
+  };
+
+  const fetchPosts = async () => {
     try {
       const response = await axios.post(
         `${BASE_URL}/post/search`,
         {
           searchText: searchQuery,
+          page: postsPage,
         },
         {
           headers: {
@@ -48,7 +65,13 @@ const SearchBar = () => {
           withCredentials: true,
         }
       );
-      setPostResults(response.data);
+
+      if ([postResults].length !== 0) {
+        setPostResults((prev) => [...prev, ...response.data]);
+      } else {
+        setPostResults(response.data);
+      }
+
     } catch (error) {
       console.error(error);
     }
@@ -56,14 +79,45 @@ const SearchBar = () => {
 
   const handleSearchChange = async (value: any) => {
     setSearchQuery(value);
-    fetchUsers(value);
-    fetchPosts(value);
+    fetchUsers();
+    fetchPosts();
   };
+
+  useEffect(() => {
+    if (page !== 1) fetchUsers();
+  }, [page]);
+
+  useEffect(() => {
+    if (postsPage !== 1) fetchPosts();
+  }, [postsPage]);
+
+  const handleScroll = (event: any) => {
+    const container = event.target;
+    if (
+      container.scrollHeight - container.scrollTop ==
+      container.clientHeight
+    ) {
+      if (activeTab === "users") nextPage();
+
+      if (activeTab === "posts") nextPagePost();
+    }
+  };
+
+  useEffect(() => {
+    const container = document.querySelector(".popover-content");
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  });
 
   const handleTabChange = async (key: string) => {
     setActiveTab(key);
-    if (key === "posts") {
-    }
   };
 
   const userContent = (
@@ -100,7 +154,10 @@ const SearchBar = () => {
   );
 
   const popoverContent = (
-    <div className="ml-2">
+    <div
+      className="ml-2 custom-scrollbar popover-content"
+      style={{ maxHeight: "400px", overflowY: "auto" }}
+    >
       <Tabs activeKey={activeTab} onChange={handleTabChange}>
         <TabPane tab="Users" key="users">
           {userContent}

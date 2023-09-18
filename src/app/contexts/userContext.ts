@@ -17,14 +17,15 @@ export type User = {
   isLoggedIn: boolean | null;
   hasReceivedFirstResponse: boolean;
   chatInfo: any;
+  groupInfo: any;
 };
 
-type setUser = (user: User) => void;
+type setUser = (user: User | null) => void;
 
 type refetch = () => void;
 
 export type UserContextType = {
-  user: User | undefined;
+  user: User | undefined | null;
   setUser: setUser;
   refetch: refetch;
   socket?: any;

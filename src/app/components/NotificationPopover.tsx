@@ -82,7 +82,7 @@ const NotificationPopover: React.FC = () => {
               <List.Item.Meta
                 avatar={
                   <span className="ml-2">
-                    <Avatar src={item.senderId.profile} />
+                    <Avatar src={item.senderId?.profile} />
                   </span>
                 }
                 title={<span>{item.message}</span>}
@@ -103,7 +103,29 @@ const NotificationPopover: React.FC = () => {
               <List.Item.Meta
                 avatar={
                   <span className="ml-2">
-                    <Avatar src={item.senderId.profile} />
+                    <Avatar src={item.senderId?.profile} />
+                  </span>
+                }
+                title={<span>{item.message}</span>}
+              />
+            </List.Item>
+          </Link>
+        </div>
+      );
+    }
+
+
+    if (item.type === "mention") {
+      return (
+        <div className="pb-4 border-b border-b-gray-300">
+          <Link href={`/${user?.username}/post/${item?.postId}`}>
+            <List.Item
+              className={`p-2 cursor-pointer transition duration-150 ease-in-out hover:bg-gray-200`}
+            >
+              <List.Item.Meta
+                avatar={
+                  <span className="ml-2">
+                    <Avatar src={item.senderId?.profile} />
                   </span>
                 }
                 title={<span>{item.message}</span>}
@@ -124,7 +146,7 @@ const NotificationPopover: React.FC = () => {
           onClick={() => router.push(`/${item?.senderId?.username}`)}
           type="link"
           className="!p-0 !m-0"
-        >{`@${item.senderId.username}`}</Button>
+        >{`@${item.senderId?.username}`}</Button>
       );
 
       if (hasAccepted) {
@@ -134,7 +156,7 @@ const NotificationPopover: React.FC = () => {
               <List.Item.Meta
                 avatar={
                   <span className="ml-2">
-                    <Avatar src={item.senderId.profile} />
+                    <Avatar src={item.senderId?.profile} />
                   </span>
                 }
                 title={
@@ -156,7 +178,7 @@ const NotificationPopover: React.FC = () => {
             <List.Item.Meta
               avatar={
                 <span className="ml-2">
-                  <Avatar src={item.senderId.profile} />
+                  <Avatar src={item.senderId?.profile} />
                 </span>
               }
               title={
@@ -193,7 +215,7 @@ const NotificationPopover: React.FC = () => {
               <List.Item.Meta
                 avatar={
                   <span className="ml-2">
-                    <Avatar src={item.senderId.profile} />
+                    <Avatar src={item.senderId?.profile} />
                   </span>
                 }
                 title={<span>{item.message}</span>}

@@ -3,14 +3,13 @@ import {
   Checkbox,
   DatePicker,
   Form,
-  Input,
-  message,
-  notification,
+  Input
 } from "antd";
 import axios from "axios";
 import { useState } from "react";
 import { BASE_URL } from "../config";
-import OTPModal from "./OTP";
+import useAuth from "../hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 type FieldType = {
   firstName: string;
@@ -26,20 +25,12 @@ type FieldType = {
 
 export default function Register() {
   const [loading, setLoading] = useState(false);
-  const [isOTPVisible, setIsOTPVisible] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  // const [isOTPVisible, setIsOTPVisible] = useState(false);
+  // const [phone, setPhone] = useState("");
+  // const [email, setEmail] = useState("");
+  const router = useRouter();
 
-  type NotificationType = "success" | "info" | "warning" | "error";
-
-  const [api, contextHolder] = notification.useNotification();
-
-  const openNotificationWithIcon = (type: NotificationType) => {
-    api[type]({
-      message: "Account created successfully!",
-      description: "Please check your mail for log in instructions.",
-    });
-  };
+  const { setEmail, setPhone, setIsRedirectedFromRegister } = useAuth();
 
   const onFinish = async (values: FieldType) => {
     setLoading(true);
@@ -47,33 +38,15 @@ export default function Register() {
       const response = await axios.post(`${BASE_URL}/auth/register`, values, {
         headers: { "Content-Type": "application/json" },
       });
+
       setPhone(response.data.phone);
       setEmail(response.data.email);
-      setIsOTPVisible(true);
+      setIsRedirectedFromRegister(true);
+      router.push("/enter-otp")
     } catch (error) {
       console.error(error);
     }
     setLoading(false);
-  };
-
-  const verifyOTP = async (value: string) => {
-    try {
-      const payload = {
-        phone: phone,
-        email: email,
-        enteredOTP: value,
-      };
-
-      const response = await axios.post(`${BASE_URL}/auth/verifyOTP`, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      openNotificationWithIcon("success");
-      setIsOTPVisible(false);
-    } catch (e: any) {
-      message.warning("OTP validation failed, try again");
-      console.error(e);
-    }
   };
 
   const passwordRegex =
@@ -144,8 +117,6 @@ export default function Register() {
 
   return (
     <>
-      {contextHolder}
-      <OTPModal visible={isOTPVisible} onOTPSubmit={verifyOTP} />
       <Form onFinish={onFinish}>
         <Form.Item
           name="firstName"

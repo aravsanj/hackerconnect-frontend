@@ -2,3 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+.custom-scrollbar {
+  scrollbar-width: thin;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Adjust the scrollbar width as needed */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1); /* Very subtle gray color */
+  border-radius: 3px; /* Rounded corners */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03); /* Extremely subtle gray background */
+}

@@ -16,6 +16,7 @@ type Props = {
   index?: number;
 };
 
+
 const Message = ({  message, isSender }: {
   message: string;
   isSender: boolean;

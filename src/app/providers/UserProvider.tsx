@@ -7,7 +7,7 @@ import { BASE_URL } from "../config";
 import { socket } from "../socket.config";
 
 function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User>({
+  const [user, setUser] = useState<User | null>({
     _id: "",
     firstName: "",
     lastName: "",
@@ -21,7 +21,8 @@ function UserProvider({ children }: { children: React.ReactNode }) {
     isLoggedIn: null,
     connections: [],
     hasReceivedFirstResponse: false,
-    chatInfo: []
+    chatInfo: [],
+    groupInfo: [],
   });
 
   const [notifications, setNotifications] = useState([]);
@@ -35,6 +36,7 @@ function UserProvider({ children }: { children: React.ReactNode }) {
       setUser({
         ...response.data.combinedData.user,
         chatInfo: response.data.combinedData.chatInfo,
+        groupInfo: response.data.combinedData.groupChats,
         isLoggedIn: true,
         hasReceivedFirstResponse: true,
       });

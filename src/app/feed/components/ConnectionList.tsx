@@ -28,23 +28,14 @@ const ConnectionList = () => {
   });
 
   const openChat = (userId: string, connectionId: string, name: string) => {
-    // if (openConnections.some((conn) => conn.connectionId === connectionId)) {
-    //   closeChat(connectionId);
-    //   return;
-    // }
-
     setConnection({ name, connectionId });
 
-    // setOpenConnections((prev) => [...prev, { name, connectionId }]);
   };
 
   const closeChat = (connectionId: string) => {
-    // setOpenConnections((prev) =>
-    //   prev.filter((id) => id.connectionId !== connectionId)
-    // );
-
     setConnection(null)
   };
+  
 
   function sendCallInvitation({ userID, userName }: sendCallInvitation) {
     const targetUser = {
@@ -65,6 +56,7 @@ const ConnectionList = () => {
         console.warn(err);
       });
   }
+
 
   const connections = user?.chatInfo.map((conn: any) => {
     const connection = conn.connection;
@@ -90,7 +82,7 @@ const ConnectionList = () => {
   });
 
   return (
-    <div className="bg-white rounded-xl p-4  mt-10">
+    <div className="bg-white rounded-xl p-4 mt-10">
       <div className="mb-4">
         <h2 className="text-xl font-semibold">Connections</h2>
       </div>
@@ -155,17 +147,6 @@ const ConnectionList = () => {
           </List.Item>
         )}
       />
-      {/* {openConnections.map((connection, index) => (
-        <ChatBox
-          key={connection.connectionId}
-          senderId={user?._id as string}
-          receiverId={connection.connectionId}
-          name={connection.name}
-          closeChat={closeChat}
-          index={index}
-        />
-      ))} */}
-
       {connection && (
         <ChatBox
           key={connection.connectionId}
