@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Button, Spin, message } from "antd";
 import axios from "axios";
 import { BASE_URL } from "../config";
@@ -9,20 +9,25 @@ import OTPBox from "./components/OTPBox";
 import EmailSentCard from "./components/EmailCard";
 import { useRouter } from "next/navigation";
 
-const OtpPage = () => {
+const Page = () => {
   const {
     email,
     phone,
     isPhoneVerified,
     isEmailVerified,
     isRedirectedFromLogin,
-    isRedirectedFromRegister
+    isRedirectedFromRegister,
   } = useAuth();
+
   const [OtpVerified, setOtpVerified] = useState(false);
   const [OTPsend, setOTPSend] = useState(false);
   const [emailSend, setEmailSend] = useState(false);
 
-  const router = useRouter()
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isRedirectedFromRegister && !isRedirectedFromLogin) router.push("/");
+  }, []);
 
   const verifyOTP = async (values: { otp: string }) => {
     try {
@@ -76,8 +81,7 @@ const OtpPage = () => {
     }
   };
 
-  if(!isRedirectedFromRegister && !isRedirectedFromLogin) {
-    router.push("/")
+  if (!isRedirectedFromRegister && !isRedirectedFromLogin) {
     return (
       <div className="h-screen flex justify-center items-center">
         <Spin size="large" />
@@ -105,8 +109,6 @@ const OtpPage = () => {
       </div>
     );
   }
-
-
 
   if (!isPhoneVerified) {
     if (OtpVerified) {
@@ -179,8 +181,6 @@ const OtpPage = () => {
       </div>
     );
   }
-
- 
 };
 
-export default OtpPage;
+export default Page;
