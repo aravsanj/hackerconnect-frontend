@@ -93,6 +93,27 @@ const NotificationPopover: React.FC = () => {
       );
     }
 
+    if (item.type === "live") {
+      return (
+        <div className="pb-4 border-b border-b-gray-300">
+          <a target="_blank" href={`/join-live/?roomName=${item?.roomName}`}>
+            <List.Item
+              className={`p-2 cursor-pointer transition duration-150 ease-in-out hover:bg-gray-200`}
+            >
+              <List.Item.Meta
+                avatar={
+                  <span className="ml-2">
+                    <Avatar src={item.senderId?.profile} />
+                  </span>
+                }
+                title={<span>{item.message}</span>}
+              />
+            </List.Item>
+          </a>
+        </div>
+      );
+    }
+
     if (item.type === "comment") {
       return (
         <div className="pb-4 border-b border-b-gray-300">

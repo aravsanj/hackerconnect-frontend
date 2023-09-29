@@ -1,6 +1,6 @@
-import { List, Avatar, Button } from "antd";
-import { CommentOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { List, Avatar, Button, Popconfirm } from "antd";
+import { CommentOutlined, DeleteOutlined } from "@ant-design/icons";
+import { SetStateAction, useState } from "react";
 import axios from "axios";
 import { BASE_URL } from "@/app/config";
 import useUser from "@/app/hooks/useUser";
@@ -14,6 +14,7 @@ import {
 } from "react-mentions";
 import mentionInputStyles from "../styles/mentionInputStyles";
 import mentionStyle from "../styles/mentionStyle";
+import Reply from "./Reply";
 
 dayjs.extend(relativeTime);
 
@@ -30,12 +31,14 @@ const Comments = ({
   setComments,
   nextPage,
   currentPage,
+  fetchComments,
 }: {
   comments: any[] | undefined;
   postId: string;
   setComments: any;
   nextPage: () => void;
   currentPage: number;
+  fetchComments: SetStateAction<any>;
 }) => {
   const [content, setContent] = useState("");
   const [mentions, setMentions] = useState<MentionItem[]>();
@@ -75,24 +78,34 @@ const Comments = ({
     display: item.username,
   }));
 
+  const deleteComment = async (commentId: string) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/post/deleteComment`,
+        { commentId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+      setComments((prev: any) => {
+        const newComments = prev.filter((pre: any) => pre._id !== commentId);
+        return newComments;
+      });
+    } catch (e: any) {
+      console.error(e);
+    }
+  };
+
   return (
     <div className="mt-10 bg-gray-100 p-4 rounded-lg">
       <div className="mb-4 flex flex-col">
-        {/* <Input
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Add a comment"
-          className="w-full !pr-4"
-          style={{ flex: 1 }} // Expand to fill available space
-          suffix={
-            <span>
-              <SendOutlined onClick={addComment} />
-            </span>
-          }
-        /> */}
         <MentionsInput
           value={content}
-          placeholder=" Add a comment"
+          placeholder="Add a comment"
           onChange={(e, newValue, newPlainTextValue, mentions) => {
             setMentions(mentions);
             setContent(newValue);
@@ -139,7 +152,25 @@ const Comments = ({
           const styledText = replaceMentionsWithStyledText(comment.content);
           const styledHtml = { __html: styledText };
           return (
-            <List.Item>
+            <List.Item
+            // actions={[
+            //   comment.user._id === user?._id && (
+            //     <Popconfirm
+            //       key="delete"
+            //       title="Are you sure you want to delete this comment?"
+            //       onConfirm={() => deleteComment(comment._id)}
+            //       okText="Yes"
+            //       cancelText="No"
+            //     >
+            //       <Button
+            //         type="text"
+            //         icon={<DeleteOutlined className="!text-sm" />}
+            //         danger
+            //       ></Button>
+            //     </Popconfirm>
+            //   ),
+            // ]}
+            >
               <List.Item.Meta
                 avatar={
                   <Avatar
@@ -152,10 +183,37 @@ const Comments = ({
                     <span>
                       {comment.user.firstName} {comment.user.lastName}
                     </span>
-                    <span className="ml-2 text-xs	 text-slate-500">{date}</span>
+                    <span className="ml-2 text-xs text-slate-500">{date}</span>
+                    {comment.user._id === user?._id && (
+                      <Popconfirm
+                        key="delete"
+                        title="Are you sure you want to delete this comment?"
+                        onConfirm={() => deleteComment(comment._id)}
+                        okText="Yes"
+                        cancelText="No"
+                        className="!self-end"
+                      >
+                        <Button
+                          type="text"
+                          icon={
+                            <DeleteOutlined className="!text-xs !p-0 !m-0" />
+                          }
+                          size="small"
+                        ></Button>
+                      </Popconfirm>
+                    )}
                   </>
                 }
-                description={<span dangerouslySetInnerHTML={styledHtml}></span>}
+                description={
+                  <>
+                    <span dangerouslySetInnerHTML={styledHtml}></span>
+                    <Reply
+                      suggestions={suggestions}
+                      postId={postId}
+                      parentCommentId={comment._id}
+                    />
+                  </>
+                }
               />
             </List.Item>
           );

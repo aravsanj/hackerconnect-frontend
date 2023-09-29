@@ -45,13 +45,11 @@ export default {
         borderRadius: "8px",
         boxShadow: "horizontal-offset vertical-offset blur-radius spread-radius color",
         position: "relative",
-        // bottom: "180px"
+        bottom: "140px"
       },
       item: {
         padding: '5px 15px',
         borderBottom: '1px solid rgba(0,0,0,0.15)',
-        
-        
         '&focused': {
           backgroundColor: '#8cd3ff',
         },

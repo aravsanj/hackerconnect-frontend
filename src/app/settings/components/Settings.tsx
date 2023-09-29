@@ -3,6 +3,7 @@ import { Layout, Menu } from "antd";
 import UpdateForm from "./UpdateForm";
 import useUser from "@/app/hooks/useUser";
 import PrivacySettingsContent from "./PrivacySettingsContent";
+import BlockedUserSettings from "./BlockedUserSettings";
 
 const { Content, Sider } = Layout;
 
@@ -16,6 +17,10 @@ const GeneralSettings = (
 
 const PrivacySettings = (
   <PrivacySettingsContent />
+);
+
+const BlockedUserSettingsContent = (
+  <BlockedUserSettings />
 );
 
 const SettingsPage = () => {
@@ -38,6 +43,9 @@ const SettingsPage = () => {
     case "2":
       contentToDisplay = PrivacySettings;
       break;
+    case "3":
+      contentToDisplay = BlockedUserSettingsContent;
+      break;
     default:
       contentToDisplay = GeneralSettings; 
   }
@@ -52,7 +60,9 @@ const SettingsPage = () => {
           onSelect={handleMenuSelect}
         >
           <Menu.Item key="1">General Settings</Menu.Item>
+          <Menu.Item key="3">Manage Blocked Users</Menu.Item>
           <Menu.Item key="2">Account Settings</Menu.Item>
+
         </Menu>
       </Sider>
       <Layout className="site-layout">{contentToDisplay}</Layout>

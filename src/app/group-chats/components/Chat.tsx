@@ -1,20 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Layout,
-  Input,
-  Button,
-  Avatar,
-  Drawer,
-  List,
-  Select,
-  Popconfirm,
-} from "antd";
+import { Layout, Button, Avatar, Drawer, List, Select, Popconfirm } from "antd";
 import { SendOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { BASE_URL } from "@/app/config";
 import useUser from "@/app/hooks/useUser";
 import { socket } from "@/app/socket.config";
 import { UserAddOutlined, LeftCircleOutlined } from "@ant-design/icons";
+import {
+  Mention,
+  MentionItem,
+  MentionsInput,
+  SuggestionDataItem,
+} from "react-mentions";
+import mentionInputStyles from "@/app/feed/styles/mentionInputStylesGroupChat";
+import mentionStyle from "@/app/feed/styles/mentionStyle";
 
 const { Content } = Layout;
 
@@ -55,6 +54,7 @@ const Chat: React.FC<{
   const [typeInfo, setTypeInfo] = useState("");
   const [openDetails, setOpenDetails] = useState(false);
   const [participants, setParticipants] = useState<string[]>([]);
+  const [mentions, setMentions] = useState<MentionItem[]>();
 
   const { user, refetch } = useUser();
   const userId = user?._id;
@@ -114,6 +114,7 @@ const Chat: React.FC<{
           chatId: selectedGroup,
           senderId: userId,
           messageText: message,
+          mentions,
         },
         {
           headers: {
@@ -157,6 +158,8 @@ const Chat: React.FC<{
     };
   }, [selectedGroup]);
 
+
+
   const handleTyping = (e: any) => {
     setMessage(e.target.value);
   };
@@ -175,6 +178,7 @@ const Chat: React.FC<{
   const adminParticipants = groupInfo?.participants.filter((participant) =>
     groupInfo?.admins.some((admin) => admin._id === participant._id)
   );
+
   const nonAdminParticipants = groupInfo?.participants.filter(
     (participant) =>
       !groupInfo?.admins.some((admin) => admin._id === participant._id)
@@ -183,6 +187,14 @@ const Chat: React.FC<{
   if (!adminParticipants || !nonAdminParticipants) return null;
 
   const sortedParticipants = [...adminParticipants, ...nonAdminParticipants];
+
+  // @ts-ignore
+  const suggestions: SuggestionDataItem[] = sortedParticipants?.map(
+    (item, index) => ({
+      id: item._id,
+      display: item.username,
+    })
+  ).filter((item, index) => item.id !== user?._id);
 
   const userSet = new Set(sortedParticipants.map((user) => user._id));
 
@@ -278,8 +290,7 @@ const Chat: React.FC<{
           );
 
           const isLoggedInUserAdmin = groupInfo?.admins.some(
-            (admin) =>
-              admin._id === userId
+            (admin) => admin._id === userId
           );
 
           return (
@@ -292,19 +303,16 @@ const Chat: React.FC<{
                     {isAdmin && <span style={{ color: "green" }}>Admin</span>}
                     {!isAdmin && isLoggedInUserAdmin && (
                       <Popconfirm
-                      placement="topRight"
-                      title="Are you sure?"
-                      description={`You're removing ${participant.firstName} ${participant.lastName}`}
-                      onConfirm={() => removeParticipant(participant?._id)}
-                      okText="Yes"
-                      cancelText="No"
-                    >
-                      <Button
-                        className="!p-0"
-                        type="link"
+                        placement="topRight"
+                        title="Are you sure?"
+                        description={`You're removing ${participant.firstName} ${participant.lastName}`}
+                        onConfirm={() => removeParticipant(participant?._id)}
+                        okText="Yes"
+                        cancelText="No"
                       >
-                        Remove
-                      </Button>
+                        <Button className="!p-0" type="link">
+                          Remove
+                        </Button>
                       </Popconfirm>
                     )}
                   </>
@@ -359,6 +367,13 @@ const Chat: React.FC<{
     </Drawer>
   );
 
+  const pattern = /@\[([a-zA-Z0-9]+)\]\([a-f0-9]+\)/;
+  function replaceMentionsWithStyledText(text: string) {
+    return text.replace(pattern, (match, mention) => {
+      return `<span style="color: blue;">${mention}</span>`;
+    });
+  }
+
   return (
     <>
       {selectedGroup ? (
@@ -372,41 +387,78 @@ const Chat: React.FC<{
           </div>
           <Content className="h-full p-4 bg-gray-100 flex flex-col">
             <div
-              className="h-full overflow-y-scroll"
+              className="h-full overflow-y-scroll custom-scrollbar"
               ref={messagesContainerRef}
             >
               {messages &&
-                messages?.map((message: any) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender.id === userId
-                        ? "justify-end"
-                        : "justify-start"
-                    } mb-2 mr-4`}
-                  >
-                    {message.sender.id !== userId && (
-                      <div className="mr-2">
-                        <Avatar src={message.sender.avatarUrl} size={40} />
-                      </div>
-                    )}
+                messages?.map((message: any) => {
+                  const styledMessage = replaceMentionsWithStyledText(
+                    message.text
+                  );
+                  const styledHtml = { __html: styledMessage };
+
+                  return (
                     <div
-                      className={`p-2 max-w-md rounded-lg ${
+                      key={message.id}
+                      className={`flex ${
                         message.sender.id === userId
-                          ? "bg-blue-200 text-right"
-                          : "bg-white text-left"
-                      }`}
+                          ? "justify-end"
+                          : "justify-start"
+                      } mb-2 mr-4`}
                     >
-                      {message.text}
+                      {message.sender.id !== userId && (
+                        <div className="mr-2">
+                          <Avatar src={message.sender.avatarUrl} size={40} />
+                        </div>
+                      )}
+                      <div
+                        className={`p-2 max-w-md rounded-lg ${
+                          message.sender.id === userId
+                            ? "bg-blue-200 text-right"
+                            : "bg-white text-left"
+                        }`}
+                        dangerouslySetInnerHTML={styledHtml}
+                      >
+                        {/* {styledMessage} */}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
             {typing && (
               <span className="text-gray-500">{`${typeInfo} is typing...`}</span>
             )}
             <div className="flex items-center gap-x-6 mr-6">
-              <Input
+              <MentionsInput
+                value={message}
+                placeholder="Type a message..."
+                onChange={(e, newValue, newPlainTextValue, mentions) => {
+                  setMentions(mentions);
+                  handleTyping(e);
+                }}
+                style={mentionInputStyles}
+                singleLine
+                className="!w-full"
+              >
+                <Mention
+                  trigger="@"
+                  data={suggestions}
+                  className="!focus:border-none"
+                  style={mentionStyle}
+                  renderSuggestion={(
+                    suggestion,
+                    search,
+                    highlightedDisplay
+                  ) => <div className="">{highlightedDisplay}</div>}
+                />
+              </MentionsInput>
+              <Button
+                type="default"
+                icon={<SendOutlined />}
+                onClick={sendMessage}
+                className="rounded-r-lg !border-none !flex !items-center"
+              ></Button>
+              {/* <Input
                 placeholder="Type a message..."
                 value={message}
                 suffix={
@@ -420,7 +472,7 @@ const Chat: React.FC<{
                 onPressEnter={sendMessage}
                 onChange={(e) => handleTyping(e)}
                 className="flex-grow rounded-l-lg"
-              />
+              /> */}
             </div>
           </Content>
         </Layout>

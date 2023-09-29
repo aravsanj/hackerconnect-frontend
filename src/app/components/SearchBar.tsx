@@ -16,11 +16,14 @@ const SearchBar = () => {
   const [page, setPage] = useState(1);
   const [postsPage, setPostsPage] = useState(1);
 
+  const controller = new AbortController();
+
   const fetchUsers = async () => {
     try {
       const response = await axios.post(
         `${BASE_URL}/user/search`,
         {
+          signal: controller.signal,
           searchText: searchQuery,
           page,
         },
@@ -55,6 +58,7 @@ const SearchBar = () => {
       const response = await axios.post(
         `${BASE_URL}/post/search`,
         {
+          signal: controller.signal,
           searchText: searchQuery,
           page: postsPage,
         },
@@ -71,7 +75,6 @@ const SearchBar = () => {
       } else {
         setPostResults(response.data);
       }
-
     } catch (error) {
       console.error(error);
     }
@@ -79,6 +82,7 @@ const SearchBar = () => {
 
   const handleSearchChange = async (value: any) => {
     setSearchQuery(value);
+    controller.abort();
     fetchUsers();
     fetchPosts();
   };

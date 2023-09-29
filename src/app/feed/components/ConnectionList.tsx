@@ -21,6 +21,7 @@ const ConnectionList = () => {
   const { user, socket, refetch } = useUser();
   const [openConnections, setOpenConnections] = useState<openConnection[]>([]);
   const [connection, setConnection] = useState<openConnection | null>();
+  const [connections, setConnections] = useState([]);
 
   const zegoInstance = createZegoInstance({
     userName: user?.username as string,
@@ -29,13 +30,11 @@ const ConnectionList = () => {
 
   const openChat = (userId: string, connectionId: string, name: string) => {
     setConnection({ name, connectionId });
-
   };
 
   const closeChat = (connectionId: string) => {
-    setConnection(null)
+    setConnection(null);
   };
-  
 
   function sendCallInvitation({ userID, userName }: sendCallInvitation) {
     const targetUser = {
@@ -57,17 +56,20 @@ const ConnectionList = () => {
       });
   }
 
-
-  const connections = user?.chatInfo.map((conn: any) => {
-    const connection = conn.connection;
-    return {
-      _id: connection._id,
-      name: `${connection.firstName} ${connection.lastName}`,
-      username: connection.username,
-      profile: connection.profile,
-      hasUnreadMessages: conn.unreadMessages,
-    };
-  });
+  useEffect(() => {
+    const connections = user?.chatInfo.map((conn: any) => {
+      const connection = conn.connection;
+      return {
+        _id: connection._id,
+        name: `${connection.firstName} ${connection.lastName}`,
+        username: connection.username,
+        profile: connection.profile,
+        hasUnreadMessages: conn.unreadMessages,
+        isOnline: connection.isOnline,
+      };
+    });
+    setConnections(connections);
+  }, [user]);
 
   useEffect(() => {
     socket?.on(
@@ -76,8 +78,26 @@ const ConnectionList = () => {
         refetch();
       }
     );
+    socket?.on("update-online-status", (users: any) => {
+      console.log(users);
+      setConnections((prevState) => {
+        const updatedConnections = [...prevState];
+    
+        users.forEach((user: any) => {
+          updatedConnections.forEach((conn: any) => {
+            if (user._id === conn._id) {
+              conn.isOnline = false;
+              console.log("reached here");
+            }
+          });
+        });
+    
+        return updatedConnections;
+      });
+    });
     return () => {
       socket?.off("message-received");
+      socket?.off("update-online-status");
     };
   });
 
@@ -141,6 +161,14 @@ const ConnectionList = () => {
                   >
                     <PhoneTwoTone className="ml-2" />
                   </Popconfirm>
+                  {connection.isOnline && (
+                    <Badge
+                      dot
+                      className="text-2xl"
+                      color="green"
+                      offset={[5, -2]}
+                    ></Badge>
+                  )}
                 </>
               }
             />

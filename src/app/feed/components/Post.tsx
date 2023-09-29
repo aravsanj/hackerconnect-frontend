@@ -119,6 +119,7 @@ const PostComponent = ({ post }: Props) => {
               setComments={setComments}
               nextPage={nextPage}
               currentPage={currentPage}
+              fetchComments={fetchComments}
             />
           )}
         </Card>

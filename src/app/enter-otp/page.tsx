@@ -8,6 +8,7 @@ import useAuth from "../hooks/useAuth";
 import OTPBox from "./components/OTPBox";
 import EmailSentCard from "./components/EmailCard";
 import { useRouter } from "next/navigation";
+import CountDown from "./components/CountDown";
 
 const Page = () => {
   const {
@@ -94,26 +95,46 @@ const Page = () => {
       <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-b from-blue-400 to-indigo-600">
         {!OtpVerified ? (
           <>
+            <CountDown action={setOTPSend} />
             <Alert
               message="OTP sent to your registered mobile. Please enter it below to proceed."
               type="success"
               showIcon
+              className="!mt-6"
             />
             <div className="mt-10">
               <OTPBox verifyOTP={verifyOTP} />
             </div>
           </>
         ) : (
-          <EmailSentCard email={email} />
+          <>
+            <Alert
+              message="The link will expire in 5 minutes"
+              type="warning"
+              showIcon
+              className="!mb-10"
+            />
+
+            <EmailSentCard email={email} />
+          </>
         )}
       </div>
     );
   }
 
+  // After redirecting from login
+
   if (!isPhoneVerified) {
     if (OtpVerified) {
       return (
         <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-b from-blue-400 to-indigo-600">
+          <Alert
+            message="The link will expire in 5 minutes"
+            type="warning"
+            showIcon
+            className="!mb-10"
+          />
+
           <EmailSentCard email={email} />
         </div>
       );
@@ -122,11 +143,14 @@ const Page = () => {
     if (OTPsend) {
       return (
         <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-b from-blue-400 to-indigo-600">
+          <CountDown action={setOTPSend} />
           <Alert
             message="OTP sent to your registered mobile. Please enter it below to proceed."
             type="success"
+            className="!mt-6"
             showIcon
           />
+
           <div className="mt-10">
             <OTPBox verifyOTP={verifyOTP} />
           </div>

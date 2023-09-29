@@ -1,32 +1,29 @@
 // @ts-nocheck
 "use client";
 
-import { BASE_URL } from "@/app/config";
 import useUser from "@/app/hooks/useUser";
 import { createZegoInstance } from "@/app/zego.config";
 import {
   ZegoCloudRoomConfig,
   ZegoUIKitPrebuilt,
 } from "@zegocloud/zego-uikit-prebuilt";
-import axios from "axios";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 
 type Props = {};
 
-const LiveStream = (props: Props) => {
+const JoinLive = (props: Props) => {
   const { user } = useUser();
-  const userName = user?.username
-  const roomName = "test" + userName;
-  const connections  = user?.connections;
-  const userId = user?._id
+  const roomName = useSearchParams().get("roomName");
 
   const zegoInstance = createZegoInstance({
-    userName: user?.username as string,
-    userID: user?._id as string,
+    userName: user?.username,
+    userID: user?._id,
+    roomName: roomName,
   });
 
   const sharedLinks: ZegoCloudRoomConfig["sharedLinks"] = [];
-  const role = "Host";
+  const role = "Audience";
   const myMeeting = async (element: ZegoCloudRoomConfig["container"]) => {
     zegoInstance.joinRoom({
       container: element,
@@ -38,27 +35,7 @@ const LiveStream = (props: Props) => {
       },
       showPreJoinView: false,
       sharedLinks,
-      onLiveStart: async () => {
-        try {
-          const response = await axios.post(
-            `${BASE_URL}/user/sendLiveRequests`,
-            {
-              roomName,
-              connections,
-              senderId: userId,
-              userName: userName,
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-              withCredentials: true,
-            }
-          );
-        } catch (e) {
-          console.error(e);
-        }
-      },
+      //   onLiveStart: (user) => console.log("test"),
     });
   };
 
@@ -75,4 +52,4 @@ const LiveStream = (props: Props) => {
   );
 };
 
-export default LiveStream;
+export default JoinLive;

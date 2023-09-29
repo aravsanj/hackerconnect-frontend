@@ -1,4 +1,4 @@
-import { Typography, Empty, Alert } from "antd";
+import { Typography } from "antd";
 import UpdateAboutModal from "./UpdateAboutModal";
 import { Skeleton } from "antd";
 import useUser from "../../hooks/useUser";
@@ -24,7 +24,9 @@ const About = ({ profile }: { profile: profile | undefined }) => {
         paragraph={{ rows: 5 }}
       >
         {about ? (
-          <Typography.Paragraph className="text-gray-600">{about}</Typography.Paragraph>
+          <Typography.Paragraph className="text-gray-600">
+            {about}
+          </Typography.Paragraph>
         ) : sameUser ? (
           <p className="text-gray-600">
             Enhance your profile by adding more details about yourself. Share
