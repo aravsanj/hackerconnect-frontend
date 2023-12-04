@@ -22,7 +22,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
       - name: Pull image from docker hub
-        run: docker pull aravsanj/hackerconnect-fontend:latest
+        run: docker pull aravsanj/hackerconnect-frontend:latest
       - name: Delete old container
         run: docker rm -f hackerconnect-frontend-container
       - name: Run docker container
