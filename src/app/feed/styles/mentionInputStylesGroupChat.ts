@@ -32,7 +32,8 @@ export default {
       },
       input: {
         padding: 1,
-        border: '2px inset',
+        paddingLeft: 6,
+        border: '1px solid gray',
       },
     },
   

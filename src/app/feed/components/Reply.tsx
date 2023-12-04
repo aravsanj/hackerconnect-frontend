@@ -234,11 +234,11 @@ const Reply = ({ suggestions, postId, parentCommentId }: any) => {
                     description={
                       <>
                         <span dangerouslySetInnerHTML={styledHtml}></span>
-                        {/* <Reply
+                        <Reply
                           suggestions={suggestions}
                           postId={postId}
                           parentCommentId={comment._id}
-                        /> */}
+                        />
                       </>
                     }
                   />

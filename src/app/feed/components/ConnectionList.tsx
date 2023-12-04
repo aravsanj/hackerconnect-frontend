@@ -78,11 +78,12 @@ const ConnectionList = () => {
         refetch();
       }
     );
+
     socket?.on("update-online-status", (users: any) => {
       console.log(users);
       setConnections((prevState) => {
         const updatedConnections = [...prevState];
-    
+
         users.forEach((user: any) => {
           updatedConnections.forEach((conn: any) => {
             if (user._id === conn._id) {
@@ -91,13 +92,29 @@ const ConnectionList = () => {
             }
           });
         });
-    
+
         return updatedConnections;
       });
     });
+
+    socket?.on("connection-online", (id: string) => {
+      setConnections((prevState) => {
+        const updatedConnections = [...prevState];
+
+        updatedConnections.forEach((conn: any) => {
+          if (conn._id === id) {
+            conn.isOnline = true;
+          }
+        }); 
+
+        return updatedConnections;
+      });
+    });
+
     return () => {
       socket?.off("message-received");
       socket?.off("update-online-status");
+      socket?.off("connection-online");
     };
   });
 

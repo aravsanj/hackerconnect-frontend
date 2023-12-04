@@ -1,11 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Layout, Button, Avatar, Drawer, List, Select, Popconfirm } from "antd";
+import {
+  Layout,
+  Button,
+  Avatar,
+  Drawer,
+  List,
+  Select,
+  Popconfirm,
+  Popover,
+} from "antd";
 import { SendOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { BASE_URL } from "@/app/config";
 import useUser from "@/app/hooks/useUser";
 import { socket } from "@/app/socket.config";
-import { UserAddOutlined, LeftCircleOutlined } from "@ant-design/icons";
+import {
+  UserAddOutlined,
+  LeftCircleOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import {
   Mention,
   MentionItem,
@@ -53,12 +66,19 @@ const Chat: React.FC<{
   const [typing, setTyping] = useState(false);
   const [typeInfo, setTypeInfo] = useState("");
   const [openDetails, setOpenDetails] = useState(false);
+  const [openMessageDetails, setOpenMessageDetails] = useState(false);
   const [participants, setParticipants] = useState<string[]>([]);
   const [mentions, setMentions] = useState<MentionItem[]>();
+  const [messageText, setMessageText] = useState<any>();
+  const [seenBy, setSeenBy] = useState<any[]>();
 
   const { user, refetch } = useUser();
   const userId = user?._id;
   const name = user?.firstName + " " + user?.lastName;
+  const firstName = user?.firstName;
+  const lastName = user?.lastName;
+  const userName = user?.username;
+  const profile = user?.profile;
 
   const connections = user?.connections.map((item) => ({
     label: `${item.firstName} ${item.lastName}`,
@@ -131,9 +151,37 @@ const Chat: React.FC<{
     }
   };
 
+  const markAllMessagesAsRead = async () => {
+    try {
+      if (!selectedGroup) {
+        throw new Error("no chat selected");
+      }
+      const response = await axios.post(
+        `${BASE_URL}/group-chat/markAllMessagesAsSeen`,
+        {
+          chatId: selectedGroup,
+          userId: userId,
+          firstName,
+          lastName,
+          userName,
+          profile,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+    } catch (e: any) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     getMessages();
     getGroupInfo();
+    markAllMessagesAsRead();
     socket?.emit("join-group", userId, selectedGroup);
     socket?.on("group-message-received", () => {
       getMessages();
@@ -157,8 +205,6 @@ const Chat: React.FC<{
       socket?.off("someone-typing-group");
     };
   }, [selectedGroup]);
-
-
 
   const handleTyping = (e: any) => {
     setMessage(e.target.value);
@@ -189,12 +235,12 @@ const Chat: React.FC<{
   const sortedParticipants = [...adminParticipants, ...nonAdminParticipants];
 
   // @ts-ignore
-  const suggestions: SuggestionDataItem[] = sortedParticipants?.map(
-    (item, index) => ({
+  const suggestions: SuggestionDataItem[] = sortedParticipants
+    ?.map((item, index) => ({
       id: item._id,
       display: item.username,
-    })
-  ).filter((item, index) => item.id !== user?._id);
+    }))
+    .filter((item, index) => item.id !== user?._id);
 
   const userSet = new Set(sortedParticipants.map((user) => user._id));
 
@@ -367,6 +413,80 @@ const Chat: React.FC<{
     </Drawer>
   );
 
+  const fetchSeenStatus = async (messageInfo: any) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/group-chat/fetchSeenStatus`,
+        { groupChatId: selectedGroup, messageId: messageInfo.id },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      setSeenBy(response.data.seenBy);
+    } catch (e: any) {
+      console.error(e);
+    }
+  };
+
+  const deliveredTo = sortedParticipants.filter((participant) => {
+    return !seenBy?.some((seen) => participant.username === seen.username) && !(participant._id === userId);
+  })
+
+  const openMessageDetailsDrawer = (messageInfo: any) => {
+    const styledMessage = replaceMentionsWithStyledText(messageInfo.text);
+    const styledHtml = { __html: styledMessage };
+    fetchSeenStatus(messageInfo);
+    setMessageText(styledHtml);
+    setOpenMessageDetails(true);
+  };
+
+  const MessageDetails = (
+    <Drawer
+      title="Message details"
+      placement="right"
+      onClose={() => setOpenMessageDetails(false)}
+      open={openMessageDetails}
+    >
+      <span
+        className="p-2 bg-blue-100 rounded-lg"
+        dangerouslySetInnerHTML={messageText}
+      ></span>
+      <span className="block my-2 mt-10 font-semibold">Seen by: </span>
+      {seenBy?.length !== 0 && (
+        <List
+          itemLayout="horizontal"
+          dataSource={seenBy}
+          renderItem={(item) => (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<Avatar src={item.profile} />}
+                title={`${item.firstName} ${item.lastName}`}
+              />
+            </List.Item>
+          )}
+        />
+      )}
+      <span className="block my-2 mt-10 font-semibold">Delivered to: </span>
+
+        <List
+          itemLayout="horizontal"
+          dataSource={deliveredTo}
+          renderItem={(item) => (
+            <List.Item>
+              <List.Item.Meta
+                avatar={<Avatar src={item.profile} />}
+                title={`${item.firstName} ${item.lastName}`}
+              />
+            </List.Item>
+          )}
+        />
+      
+    </Drawer>
+  );
+
   const pattern = /@\[([a-zA-Z0-9]+)\]\([a-f0-9]+\)/;
   function replaceMentionsWithStyledText(text: string) {
     return text.replace(pattern, (match, mention) => {
@@ -379,13 +499,14 @@ const Chat: React.FC<{
       {selectedGroup ? (
         <Layout className="h-screen">
           {ChatDetails}
+          {MessageDetails}
           <div
             onClick={() => setOpenDetails(true)}
             className="bg-[#001529] p-2 h-[80px] flex items-center cursor-pointer"
           >
             <h2 className="text-xl text-white">{groupInfo?.title}</h2>
           </div>
-          <Content className="h-full p-4 bg-gray-100 flex flex-col">
+          <Content className="h-full p-4 bg-gradient-to-r from-gray-200 to-gray-100 flex flex-col">
             <div
               className="h-full overflow-y-scroll custom-scrollbar"
               ref={messagesContainerRef}
@@ -400,7 +521,7 @@ const Chat: React.FC<{
                   return (
                     <div
                       key={message.id}
-                      className={`flex ${
+                      className={`relative flex ${
                         message.sender.id === userId
                           ? "justify-end"
                           : "justify-start"
@@ -411,16 +532,41 @@ const Chat: React.FC<{
                           <Avatar src={message.sender.avatarUrl} size={40} />
                         </div>
                       )}
-                      <div
-                        className={`p-2 max-w-md rounded-lg ${
-                          message.sender.id === userId
-                            ? "bg-blue-200 text-right"
-                            : "bg-white text-left"
-                        }`}
-                        dangerouslySetInnerHTML={styledHtml}
-                      >
-                        {/* {styledMessage} */}
-                      </div>
+                      {message.sender.id === userId ? (
+                        <Popover
+                          content={
+                            <Button
+                              type="primary"
+                              onClick={() => {
+                                openMessageDetailsDrawer(message);
+                              }}
+                              className="!flex !items-center"
+                            >
+                              <InfoCircleOutlined /> Info
+                            </Button>
+                          }
+                          trigger="hover"
+                          placement="topRight"
+                        >
+                          <div
+                            className={`p-2 max-w-md rounded-lg ${
+                              message.sender.id === userId
+                                ? "bg-blue-200 text-right"
+                                : "bg-white text-left"
+                            }`}
+                            dangerouslySetInnerHTML={styledHtml}
+                          ></div>
+                        </Popover>
+                      ) : (
+                        <div
+                          className={`p-2 max-w-md rounded-lg ${
+                            message.sender.id === userId
+                              ? "bg-blue-200 text-right"
+                              : "bg-white text-left"
+                          }`}
+                          dangerouslySetInnerHTML={styledHtml}
+                        ></div>
+                      )}
                     </div>
                   );
                 })}
@@ -453,26 +599,13 @@ const Chat: React.FC<{
                 />
               </MentionsInput>
               <Button
-                type="default"
+                type="primary"
                 icon={<SendOutlined />}
                 onClick={sendMessage}
-                className="rounded-r-lg !border-none !flex !items-center"
-              ></Button>
-              {/* <Input
-                placeholder="Type a message..."
-                value={message}
-                suffix={
-                  <Button
-                    type="default"
-                    icon={<SendOutlined />}
-                    onClick={sendMessage}
-                    className="rounded-r-lg !border-none !flex !items-center"
-                  ></Button>
-                }
-                onPressEnter={sendMessage}
-                onChange={(e) => handleTyping(e)}
-                className="flex-grow rounded-l-lg"
-              /> */}
+                className="!rounded-sm !border-none !flex !items-center"
+              >
+                Send
+              </Button>
             </div>
           </Content>
         </Layout>

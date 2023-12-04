@@ -7,8 +7,9 @@ import { BASE_URL } from "../config";
 import { UserOutlined } from "@ant-design/icons";
 import {
   HomeFilled,
-  TeamOutlined
-} from "@ant-design/icons";
+  TeamOutlined,
+  VideoCameraOutlined, // Import Ant Design icon
+} from "@ant-design/icons"; // Import Ant Design icons
 import NotificationPopover from "./NotificationPopover";
 import SearchBar from "./SearchBar";
 
@@ -35,7 +36,7 @@ const NavBar = () => {
       refetch();
       router.push("/");
     } catch (error) {
-      console.error("Logout failed:", error);2
+      console.error("Logout failed:", error);
     }
   }
 
@@ -85,6 +86,14 @@ const NavBar = () => {
         </Link>
 
         <SearchBar />
+
+        <Button
+          type="primary"
+          icon={<VideoCameraOutlined />}
+          onClick={() => window.open("/live", "_blank")}
+        >
+          Go Live
+        </Button>
       </div>
 
       <div className="flex gap-x-3">

@@ -26,7 +26,7 @@ const Sidebar = () => {
           withCredentials: true,
         }
       );
-      setHasUnreadMentions(response.data.hasUnread)
+      setHasUnreadMentions(response.data.hasUnread);
     } catch (e) {
       console.error(e);
     }
@@ -39,12 +39,11 @@ const Sidebar = () => {
   useEffect(() => {
     socket?.on("group-mention", () => {
       checkUnreadMentions();
-    })
+    });
     return () => {
       socket?.off("group-mention");
     };
-  }, [])
-
+  });
 
   type groupType = {
     _id: string;
@@ -81,7 +80,7 @@ const Sidebar = () => {
           <Menu.Item key="mentions" className="text-lg">
             <div className="">
               <span>Mentions</span>
-             {hasUnreadMentions && <Badge dot />}
+              {hasUnreadMentions && <Badge dot />}
             </div>
           </Menu.Item>
           {groups?.map((grp) => {
@@ -96,7 +95,9 @@ const Sidebar = () => {
       {selectedMenu !== "mentions" && (
         <Chat selectedGroup={selectedMenu} setSelectedMenu={setSelectedMenu} />
       )}
-      {selectedMenu === "mentions" && <Mentions setHasUnreadMentions={setHasUnreadMentions} />}
+      {selectedMenu === "mentions" && (
+        <Mentions setHasUnreadMentions={setHasUnreadMentions} />
+      )}
     </Layout>
   );
 };
