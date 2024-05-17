@@ -42,32 +42,40 @@ export default function Page() {
 
   return (
     <ConfigProvider theme={theme}>
-        <StyleProvider hashPriority="high">
-          <Row className="h-[100vh] bg-[#1DA1F2]" justify="center">
-            <ParticlesContainer />
-            <Col>
-              <div className="mt-24 text-center">
-                <h1 className="text-4xl font-extrabold leading-tight text-black mb-2">
-                  <span className="text-white font-mono italic">Konnect</span>
-                </h1>
-                <p className="text-lg">
-                  <span className="text-white font-italic">
-                    Let them{" "}
-                    <span className="bg-white text-black rounded px-2">
-                      know
-                    </span>
-                  </span>{" "}
-                  <span className="text-white">
-                    you&apos;re <i>here</i>
-                  </span>
+      <StyleProvider hashPriority="high">
+        <Row className="h-[100vh] bg-[#1DA1F2]" justify="center">
+          <ParticlesContainer />
+          <Col>
+            <div className="mt-24 text-center">
+              <h1 className="text-4xl font-extrabold leading-tight text-black mb-2">
+                <span className="text-white font-mono italic">Konnect</span>
+              </h1>
+              <p className="text-lg">
+                <span className="text-white font-italic">
+                  Let them{" "}
+                  <span className="bg-white text-black rounded px-2">know</span>
+                </span>{" "}
+                <span className="text-white">
+                  you&apos;re <i>here</i>
+                </span>
+              </p>
+            </div>
+            <Card className="relative top-24 left-[50%] -translate-x-[50%] max-w-[400px] ">
+              <Tabs centered={true} defaultActiveKey="1" items={items} />
+              <div className="bg-[#333] text-white p-4 rounded-lg ">
+                <p className="text-sm font-bold mb-2">Test credentials:</p>
+                <p className="text-sm">
+                  <span className="font-bold">Username: </span>aravsanj
+                </p>
+                <p className="text-sm">
+                  <span className="font-bold">Password: </span>
+                  Scdrid$1
                 </p>
               </div>
-              <Card className="relative top-24 left-[50%] -translate-x-[50%] max-w-[400px]">
-                <Tabs centered={true} defaultActiveKey="1" items={items} />
-              </Card>
-            </Col>
-          </Row>
-        </StyleProvider>
+            </Card>
+          </Col>
+        </Row>
+      </StyleProvider>
     </ConfigProvider>
   );
 }
