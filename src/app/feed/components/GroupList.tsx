@@ -1,7 +1,6 @@
 import useUser from "@/app/hooks/useUser";
 import { Button } from "antd";
-import { LinkOutlined } from '@ant-design/icons';
-
+import { LinkOutlined } from "@ant-design/icons";
 
 type GroupName = {
   _id: string;
@@ -13,7 +12,6 @@ type GroupNames = GroupName[];
 const GroupListCard = () => {
   const { user } = useUser();
   const groupNames: GroupNames = user?.groupInfo;
-  
 
   return (
     <div className="bg-white rounded-xl p-4 w-[300px]">
@@ -32,12 +30,12 @@ const GroupListCard = () => {
       </ul>
       <Button type="link" className="mt-6 !px-0">
         <a
-          href="http://localhost:3000/group-chats"
+          href="https://hc.opine.ink/group-chats"
           target="_blank"
           rel="noopener noreferrer"
         >
           Open group chats
-          <LinkOutlined style={{ marginLeft: '4px' }} />
+          <LinkOutlined style={{ marginLeft: "4px" }} />
         </a>
       </Button>
     </div>
